@@ -1,0 +1,19 @@
+{
+  "name": "website.cousinomath.mathinput",
+  "version": "0.0.0",
+  "keyword": "",
+  "homepage": "",
+  "license": "Artistic-2.0",
+  "main": "./dest/mathInput.js",
+  "devDependencies": {
+    "typescript": "^1.8.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "description": "",
+  "dependencies": {
+    "@cousinomath/utilities": "file:../Utilities"
+  }
+}
