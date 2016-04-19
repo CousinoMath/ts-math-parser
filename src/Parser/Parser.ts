@@ -107,10 +107,28 @@ let lessEq = createREcomb(/<=/, "<=", "less than or equal to");
 let equals = createREcomb(/=/, "=", "equals");
 let greaterThan = createREcomb(/>/, ">", "greater than");
 let greaterEq = createREcomb(/>=/, ">=", "greater than or equal to");
-let relationSymbol = lessThan.alternatives([lessEq, equals, greaterThan, greaterEq]);
-
 let plus = createREcomb(/\+/, "+", "plus");
 let minus = createREcomb(/-/, "-", "minus");
 let times = createREcomb(/\*/, "*", "times");
 let divides = createREcomb(/\//, "/", "divides");
 let power = createREcomb(/\^/, "^", "power");
+let numberLit = RegExpCombinator<string>(/(?:+|-)*(?:[0-9]*\.[0-9]+|[0-9])+/,
+  function(str, st) { return str; },
+  function(st) { return "Failed to parse a number starting at position " + st.processed.length; });
+let functionLit = RegExpCombinator<string>(/log|ln|sqrt|exp|(?:a(?:rc)?)?(?:sin|cos|tan|sec|csc|cot)/i,
+  function(str, st) {
+    let token = str.toLowerCase();
+    switch(token) {
+      case "asin": return "arcsin";
+      case "acos": return "arccos";
+      case "atan": return "arctan";
+      case "asec": return "arcsec";
+      case "acsc": return "arccsc";
+      case "acot": return "arccot";
+      default: return token;
+    }},
+  function(st) { return "Failed to parse a function name starting at position " + st.processed.length; });
+let variableLit = RegExpCombinator<string>(/[a-zA-Z]\w*/,
+  function(str, st) { return str; },
+  function(st) { return "Failed to parse a variable name starting at position " + st.processed.length; });
+let relationSymbol = lessThan.alternatives([lessEq, equals, greaterThan, greaterEq]);
