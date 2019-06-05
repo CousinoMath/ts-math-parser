@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
+    "module": "ES6",
+    "moduleResolution": "node",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "outDir": "./dest/",
     "sourceMap": true,
-    "noImplicitAny": true,
-    "module": "commonjs",
-    "target": "ES6"
+    "strict": true,
+    "target": "ES6",
+    "types": ["jest", "node"],
   },
   "compileOnSave": true,
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["./**/*.spec.ts", "node_modules"]
 }

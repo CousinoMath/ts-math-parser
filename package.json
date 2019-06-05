@@ -2,18 +2,33 @@
   "name": "website.cousinomath.mathinput",
   "version": "0.0.0",
   "keyword": "",
-  "homepage": "",
-  "license": "Artistic-2.0",
+  "homepage": "http://www.github.com/cousinomath/",
+  "license": "MIT",
   "main": "./dest/mathInput.js",
   "devDependencies": {
-    "typescript": "^1.8.0"
+    "@types/jest": "^24.0.13",
+    "jest": "^24.8.0",
+    "prettier": "^1.17.1",
+    "ts-jest": "^24.0.2",
+    "ts-node": "^3.2.0",
+    "tslint": "^5.16.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typedoc": "^0.14.2",
+    "typescript": "^3.4.5"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -p tsconfig.json",
+    "coverage": "jest --coverage",
+    "docs": "typedoc --options typedoc.json src/index.ts",
+    "lint": "tslint -p tsconfig.json",
+    "test": "jest",
+    "watch": "tsc -w -p tsconfig.json"
   },
   "author": "",
   "description": "",
   "dependencies": {
-    "@cousinomath/utilities": "file:../Utilities"
+    "@types/complex": "^3.0.32",
+    "Complex": "^3.0.0",
+    "cousinomath-utilities": "../Utilities/"
   }
 }

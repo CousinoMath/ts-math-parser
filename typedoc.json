@@ -1,0 +1,7 @@
+{
+  "mode": "modules",
+  "name": "CousinoMath Math Input",
+  "out": "./doc",
+  "readme": "./README.md",
+  "tsconfig": "./tsconfig.json"
+}
