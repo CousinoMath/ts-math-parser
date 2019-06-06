@@ -1,8 +1,8 @@
 {
-  "name": "website.cousinomath.mathinput",
+  "name": "ts-math-parser",
   "version": "0.0.0",
   "keyword": "",
-  "homepage": "http://www.github.com/cousinomath/",
+  "homepage": "http://www.github.com/CousinoMath/",
   "license": "MIT",
   "main": "./dest/mathInput.js",
   "devDependencies": {
@@ -29,6 +29,6 @@
   "dependencies": {
     "@types/complex": "^3.0.32",
     "Complex": "^3.0.0",
-    "cousinomath-utilities": "../Utilities/"
+    "cousinomath-utilities": "git+https://www.github.com/CousinoMath/ts-utilities"
   }
 }

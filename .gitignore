@@ -1,4 +1,4 @@
-./dest
-./node_modules
+dest
 *.log
 *.lock
+node_modules
