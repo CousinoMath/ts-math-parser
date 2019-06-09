@@ -1,7 +1,7 @@
 export {
   Token, TokenCaret, TokenConstant, TokenFunction, TokenMinus,
   TokenNumber, TokenPlus, TokenSlash, TokenStar, TokenVariable,
-  TokenEOI
+  TokenEOI,
 } from './token';
 export { Lexer } from './lexer';
 export { Parser } from './parser';

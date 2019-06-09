@@ -1,4 +1,4 @@
-import { err, isErr, ok, Result, unwrapErr, unwrapOk } from 'cousinomath-utilities';
+import { err, isErr, ok, Result, unwrapErr, unwrapOk } from 'ts-utilities';
 import { ASTNode, ASTNumber, Token } from './internal';
 
 export class Parser {

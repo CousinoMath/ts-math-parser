@@ -1,4 +1,4 @@
-import { err, isOk, ok, Result, unwrapErr, unwrapOk } from 'cousinomath-utilities';
+import { err, isOk, ok, Result, unwrapErr, unwrapOk } from 'ts-utilities';
 import { Token } from './internal';
 
 export class Lexer {
@@ -25,7 +25,7 @@ export class Lexer {
         if (isOk(nextToken)) {
           tokens.push(unwrapOk(nextToken));
         } else {
-          return err(unwrapErr(nextToken))
+          return err(unwrapErr(nextToken));
         }
       }
     }
