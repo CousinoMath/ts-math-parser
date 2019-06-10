@@ -1,4 +1,4 @@
-import { err, isErr, ok, Result, unwrapErr, unwrapOk } from 'ts-utilities';
+import { err, isErr, ok, Result, unwrapErr, unwrapOk } from '@cousinomath/ts-utilities';
 import { ASTNode, ASTNumber, Token } from './internal';
 
 export class Parser {
@@ -41,8 +41,7 @@ export class Parser {
           args.push({ kind: '*', arguments: [mOne, unwrapOk(factorResult)] });
           break;
         default:
-          return err('Expected to see a + or - here, instead of a ' +
-            JSON.stringify(this.source[this.index]));
+          return err(`Expected to see a + or - here, instead of a ${JSON.stringify(this.source[this.index])}`);
       }
     }
     switch (args.length) {
@@ -148,7 +147,7 @@ export class Parser {
           return err('Unmatched parentheses');
         }
       }
-      return err('Unknown input ' + JSON.stringify(current));
+      return err(`Unknown input ${JSON.stringify(current)}`);
     }
     return err('End of input reached prematurely.');
   }

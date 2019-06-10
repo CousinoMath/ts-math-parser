@@ -1,4 +1,4 @@
-import { err, isOk, ok, Result, unwrapErr, unwrapOk } from 'ts-utilities';
+import { err, isOk, ok, Result, unwrapErr, unwrapOk } from '@cousinomath/ts-utilities';
 import { Token } from './internal';
 
 export class Lexer {
@@ -61,7 +61,7 @@ export class Lexer {
         } else if (this.isAlpha()) {
           return this.lexIdentifier();
         } else {
-          return err('Unrecognized symbol: ' + this.source[this.start]);
+          return err(`Unrecognized symbol: ${this.source[this.start]}`);
         }
     }
   }

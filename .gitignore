@@ -1,6 +1,6 @@
 dest
 dist
-*.log
-*.lock
 coverage
 node_modules
+*.log
+*.lock
