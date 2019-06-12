@@ -3,6 +3,7 @@ export {
   TokenNumber, TokenPlus, TokenSlash, TokenStar, TokenVariable,
   TokenEOI,
 } from './token';
+export { Error } from './error';
 export { Lexer } from './lexer';
 export { Parser } from './parser';
-export { ASTNode, ASTNumber } from './astNode';
+export { ASTNode, ASTNumber, evaluate, latexDisplay } from './astNode';

@@ -1,5 +1,5 @@
 import { err, isErr, ok, Result, unwrapErr, unwrapOk } from '@cousinomath/ts-utilities';
-import { ASTNode, ASTNumber, Token } from './internal';
+import { ASTNode, ASTNumber, Error, Token } from './internal';
 
 export class Parser {
   public readonly source: Token[];
@@ -11,7 +11,7 @@ export class Parser {
     this.length = source.length;
   }
 
-  public expression(): Result<ASTNode, string> {
+  public expression(): Result<ASTNode, Error> {
     let factorResult = this.factor();
     if (isErr(factorResult)) {
       return err(unwrapErr(factorResult));
@@ -21,6 +21,7 @@ export class Parser {
     while (!endLoop && this.index < this.length) {
       switch (this.source[this.index].kind) {
         case 'eoi':
+        case ')':
           endLoop = true;
           break;
         case '+':
@@ -41,7 +42,12 @@ export class Parser {
           args.push({ kind: '*', arguments: [mOne, unwrapOk(factorResult)] });
           break;
         default:
-          return err(`Expected to see a + or - here, instead of a ${JSON.stringify(this.source[this.index])}`);
+          return err({
+            end: this.source[this.index].end,
+            lexemes: this.source[this.index].lexeme,
+            message: 'Expected to see a + or - here',
+            start: this.source[this.index].start,
+          });
       }
     }
     switch (args.length) {
@@ -51,7 +57,7 @@ export class Parser {
     }
   }
 
-  public factor(): Result<ASTNode, string> {
+  public factor(): Result<ASTNode, Error> {
     let expResult = this.exponential();
     if (isErr(expResult)) {
       return err(unwrapErr(expResult));
@@ -61,6 +67,7 @@ export class Parser {
     while (!endLoop && this.index < this.length) {
       switch (this.source[this.index].kind) {
         case 'eoi':
+        case ')':
         case '+':
         case '-':
           endLoop = true;
@@ -92,7 +99,7 @@ export class Parser {
     }
   }
 
-  public exponential(): Result<ASTNode, string> {
+  public exponential(): Result<ASTNode, Error> {
     let negate = false;
     if (this.index < this.length && this.source[this.index].kind === '-') {
       negate = true;
@@ -104,6 +111,7 @@ export class Parser {
     }
     let exp = unwrapOk(expResult);
     if (this.index < this.length && this.source[this.index].kind === '^') {
+      this.index += 1;
       expResult = this.exponential();
       if (isErr(expResult)) {
         return err(unwrapErr(expResult));
@@ -117,7 +125,7 @@ export class Parser {
     return ok(exp);
   }
 
-  public atom(): Result<ASTNode, string> {
+  public atom(): Result<ASTNode, Error> {
     if (this.index < this.length) {
       const current = this.source[this.index];
       this.index += 1;
@@ -127,6 +135,9 @@ export class Parser {
       }
       if (current.kind === 'variable') {
         return ok({ kind: 'variable', name: current.name });
+      }
+      if (current.kind === 'constant') {
+        return ok({ kind: 'constant', name: current.name });
       }
       if (current.kind === 'function') {
         const argResult = this.atom();
@@ -144,11 +155,27 @@ export class Parser {
           this.index += 1;
           return ok(unwrapOk(exprResult));
         } else {
-          return err('Unmatched parentheses');
+          const position = this.source[this.length - 1].start;
+          return err({
+            end: position,
+            lexemes: '',
+            message: 'Unmatched parentheses',
+            start: position,
+          });
         }
       }
-      return err(`Unknown input ${JSON.stringify(current)}`);
+      return err({
+        end: current.end,
+        lexemes: current.lexeme,
+        message: 'Expected a number, variable, or function',
+        start: current.start,
+      });
     }
-    return err('End of input reached prematurely.');
+    return err({
+      end: this.length,
+      lexemes: '',
+      message: 'End of input reached prematurely.',
+      start: this.length,
+    });
   }
 }

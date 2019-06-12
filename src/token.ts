@@ -1,53 +1,58 @@
 // tslint:disable interface-name
-export interface TokenPlus {
+export interface TokenBase {
+  readonly lexeme: string;
+  readonly start: number;
+  readonly end: number;
+}
+export interface TokenPlus extends TokenBase {
   readonly kind: '+';
 }
 
-export interface TokenMinus {
+export interface TokenMinus extends TokenBase {
   readonly kind: '-';
 }
 
-export interface TokenStar {
+export interface TokenStar extends TokenBase {
   readonly kind: '*';
 }
 
-export interface TokenSlash {
+export interface TokenSlash extends TokenBase {
   readonly kind: '/';
 }
 
-export interface TokenCaret {
+export interface TokenCaret extends TokenBase {
   readonly kind: '^';
 }
 
-export interface TokenFunction {
+export interface TokenFunction extends TokenBase {
   readonly kind: 'function';
   readonly name: string;
 }
 
-export interface TokenConstant {
+export interface TokenConstant extends TokenBase {
   readonly kind: 'constant';
   readonly name: string;
 }
 
-export interface TokenVariable {
+export interface TokenVariable extends TokenBase {
   readonly kind: 'variable';
   readonly name: string;
 }
 
-export interface TokenNumber {
+export interface TokenNumber extends TokenBase {
   readonly kind: 'number';
   readonly value: number;
 }
 
-export interface TokenEOI {
+export interface TokenEOI extends TokenBase {
   readonly kind: 'eoi';
 }
 
-export interface TokenLParen {
+export interface TokenLParen extends TokenBase {
   readonly kind: '(';
 }
 
-export interface TokenRParen {
+export interface TokenRParen extends TokenBase {
   readonly kind: ')';
 }
 

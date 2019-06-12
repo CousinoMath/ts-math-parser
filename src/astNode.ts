@@ -57,14 +57,14 @@ export function evaluate(node: ASTNode, memory: Map<string, Complex>): Complex {
   switch (node.kind) {
     case '+':
       return node.arguments.reduce((sum, arg) => {
-          const [sumRe, sumIm] = sum.toVector();
-          return evaluate(arg, memory).add(sumRe, sumIm);
-        }, Complex.ZERO);
+        const [sumRe, sumIm] = sum.toVector();
+        return evaluate(arg, memory).add(sumRe, sumIm);
+      }, Complex.ZERO);
     case '*':
       return node.arguments.reduce((prod, arg) => {
-          const [prodRe, prodIm] = prod.toVector();
-          return evaluate(arg, memory).mul(prodRe, prodIm);
-        }, Complex.ONE);
+        const [prodRe, prodIm] = prod.toVector();
+        return evaluate(arg, memory).mul(prodRe, prodIm);
+      }, Complex.ONE);
     case '^':
       const [expRe, expIm] = evaluate(node.exp, memory).toVector();
       return evaluate(node.base, memory).pow(expRe, expIm);
@@ -78,7 +78,7 @@ export function evaluate(node: ASTNode, memory: Map<string, Complex>): Complex {
       const argEvaled = evaluate(node.argument, memory);
       switch (node.name) {
         case 'abs': return new Complex(argEvaled.abs(), 0);
-        case 'acos': return argEvaled.acos();
+        case 'asec': return argEvaled.asec();
         case 'asin': return argEvaled.asin();
         case 'atan': return argEvaled.atan();
         case 'cos': return argEvaled.cos();
@@ -90,12 +90,15 @@ export function evaluate(node: ASTNode, memory: Map<string, Complex>): Complex {
       }
     case 'constant':
       switch (node.name) {
+        case 'i': return Complex.I;
         case 'pi': return Complex.PI;
         case 'e': return Complex.E;
       }
     case 'variable':
       const retrieval = memory.get(node.name);
       return retrieval !== undefined ? retrieval : Complex.NAN;
+    case 'number':
+      return new Complex(node.value, 0);
   }
   return Complex.NAN;
 }
@@ -130,8 +133,6 @@ function shouldParenthesize(parent: ASTNode, node: ASTNode): boolean {
       switch (node.kind) {
         case '+':
         case '-':
-        case '*':
-        case '/':
           return true;
         default:
           return false;
@@ -144,7 +145,7 @@ function shouldParenthesize(parent: ASTNode, node: ASTNode): boolean {
         case '/':
           return true;
         default:
-          return false;
+          return parent.exp === node;
       }
     case 'function':
       switch (parent.name) {
@@ -155,7 +156,7 @@ function shouldParenthesize(parent: ASTNode, node: ASTNode): boolean {
           return true;
       }
     default:
-      return true;
+      return false;
   }
 }
 
@@ -169,62 +170,89 @@ export function latexDisplay(node: ASTNode): string {
           const firstTerm = terms.shift()!;
           const [firstNegate, actualFirstTerm] = shouldNegate(firstTerm);
           let output = latexDisplay(actualFirstTerm);
-          output = shouldParenthesize(firstTerm, actualFirstTerm) ?
-            '\\left(' + output + '\\right)' : output;
+          output = shouldParenthesize(node, actualFirstTerm) ?
+            `\\left(${output}\\right)` : output;
           output = (firstNegate ? '-' : '') + output;
           for (const term of terms) {
             // no need to parenthesize here; parent is `+`
-            const [negate, actualTerm] = shouldNegate(term);
-            output += (negate ? '-' : '+') + latexDisplay(actualTerm);
+            const [negate0, actualTerm] = shouldNegate(term);
+            output += (negate0 ? '-' : '+') + latexDisplay(actualTerm);
           }
           return output;
       }
     case '*':
+      const [negate1, actualFactor1] = shouldNegate(node);
+      if (negate1) {
+        return `-${latexDisplay(actualFactor1)}`;
+      }
       switch (node.arguments.length) {
         case 0: return '1';
         default:
           const factors = node.arguments;
           const firstFactor = factors.shift()!;
-          let output = latexDisplay(firstFactor);
-          output = shouldParenthesize(node, firstFactor) ?
-            '\\left(' + output + '\\right)' : output;
+          const [negate2, actualFactor2] = shouldNegate(firstFactor);
+          let output = latexDisplay(actualFactor2);
+          let parenthesize = shouldParenthesize(node, actualFactor2);
           for (const factor of factors) {
-            const [recip, actualFactor] = shouldReciprocate(factor);
-            const factorOutput = latexDisplay(actualFactor);
+            const [recip, actualFactor0] = shouldReciprocate(factor);
+            const factorOutput = latexDisplay(actualFactor0);
             if (recip) {
-              output =
-                '\\frac{' + output + '}{' + factorOutput + '}';
-            } else if (shouldParenthesize(node, factor)) {
-              output = output + ' \\left(' + factorOutput + '\\right)';
+              output = output.startsWith('-') ?
+                `-\\frac{${output.substring(1)}}{${factorOutput}}` :
+                `\\frac{${output}}{${factorOutput}}`;
             } else {
-              output = output + ' ' + factorOutput;
+              if (parenthesize) {
+                output = `\\left(${output}\\right)`;
+              }
+              output = shouldParenthesize(node, factor) ?
+                `${output} \\left(${factorOutput}\\right)` :
+                `${output} ${factorOutput}`;
             }
+            parenthesize = false;
           }
-          return output;
+          return negate2 ? `-${output}` : output;
       }
     case '^':
       const baseOutput = latexDisplay(node.base);
-      const expOutput = '}^{' + latexDisplay(node.exp) + '}';
+      const expOutput = `}^{${latexDisplay(node.exp)}}`;
       if (shouldParenthesize(node, node.base)) {
-        return '{\\left(' + baseOutput + '\\right)' + expOutput;
+        return `{\\left(${baseOutput}\\right)${expOutput}`;
       } else {
-        return '{' + baseOutput + expOutput;
+        return `{${baseOutput}${expOutput}`;
       }
     case '-':
-      return latexDisplay(node.left) + '-' + latexDisplay(node.right);
+      return `${latexDisplay(node.left)}-${latexDisplay(node.right)}`;
     case '/':
-      return '\\frac{' + latexDisplay(node.left) + '}{' + latexDisplay(node.right) + '}';
+      return `\\frac{${latexDisplay(node.left)}}{${latexDisplay(node.right)}}`;
     case 'function':
       const argOutput = latexDisplay(node.argument);
       switch (node.name) {
-        case 'abs': return '\\left|' + argOutput + '\\right|';
-        case 'sqrt': return '\\sqrt{' + argOutput + '}';
-        default:
-          const funcOutput = '\\' + node.name + ' ';
+        case 'abs': return `\\left|${argOutput}\\right|`;
+        case 'asec':
           if (shouldParenthesize(node, node.argument)) {
-            return funcOutput + '\\left(' + argOutput + '\\right)';
+            return `\\sec^{-1}\\left(${argOutput}\\right)`;
           } else {
-            return funcOutput + argOutput;
+            return `\\sec^{-1}${argOutput}`;
+          }
+        case 'asin':
+          if (shouldParenthesize(node, node.argument)) {
+            return `\\sin^{-1}\\left(${argOutput}\\right)`;
+          } else {
+            return `\\sin^{-1}${argOutput}`;
+          }
+        case 'atan':
+          if (shouldParenthesize(node, node.argument)) {
+            return `\\tan^{-1}\\left(${argOutput}\\right)`;
+          } else {
+            return `\\tan^{-1}${argOutput}`;
+          }
+        case 'sqrt': return `\\sqrt{${argOutput}}`;
+        default:
+          const funcOutput = `\\${node.name}`;
+          if (shouldParenthesize(node, node.argument)) {
+            return `${funcOutput}\\left(${argOutput}\\right)`;
+          } else {
+            return `${funcOutput} ${argOutput}`;
           }
       }
     case 'constant':
