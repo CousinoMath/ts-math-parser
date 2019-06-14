@@ -1,5 +1,4 @@
-dest
-dist
+# dist
 coverage
 node_modules
 *.log
